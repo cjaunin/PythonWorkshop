@@ -64,7 +64,7 @@ lagged_dates = sp500_subset_df.monthend_date + DateOffset(months=-1) + MonthEnd(
 lagged_index = pd.MultiIndex.from_arrays([sp500_subset_df['Name'], lagged_dates])
 sp500_subset_df = sp500_subset_df.set_index(['Name', 'monthend_date'])
 sp500_subset_df['ret'] = np.log(sp500_subset_df.close) - np.log(sp500_subset_df.close.reindex(lagged_index)).values
-# what if some observations are missing
+# what if some observations are missing  --> it still works
 sp500_subset_df_copy = sp500_subset_df.copy()
 mask = sp500_subset_df.clean_date != pd.to_datetime('2016-06-30')
 sp500_subset_df = sp500_subset_df[mask].reset_index()
@@ -80,10 +80,11 @@ sp500_subset_close_df.index = sp500_subset_close_df.index.to_period('M')
 sp500_subset_ret_df = np.log(sp500_subset_close_df).values - np.log(sp500_subset_close_df.reindex(lagged_index)).values
 sp500_subset_ret_df = pd.DataFrame(sp500_subset_ret_df, index=sp500_subset_close_df.index, columns=sp500_subset_close_df.columns)
 ########################################################################################################################
-# summary statistics
+# summary statistics and correlations
 sumstat_df = sp500_subset_df.describe()
 print(sumstat_df.to_latex())
-print(sumstat_df.to_latex(float_format="{:,.4f}".format))
+sumstat_tab = sumstat_df.to_latex(float_format="{:,.4f}".format)
+print(sumstat_tab)
 # returns by ticker
 ret_sumstat_firm_df = sp500_subset_df.groupby('Name')['ret'].describe()
 # correlation
@@ -101,11 +102,11 @@ sp500_df.head(10)
 filename = '/workshop_output1.pkl'
 sp500_subset_df.to_pickle(path.get('Outputs') + filename)
 # as pickle 2 - when the structure you want to save is not a dataframe
-filename = '/workshop_output2.pkl'
+filename = '/sumstat_table.txt'
 with open(path.get('Outputs') + filename, 'wb') as f:
-    pickle.dump(sp500_subset_df, f)
+    pickle.dump(sumstat_tab, f)
 # as csv
-filename = '/workshop_output3.csv'
+filename = '/workshop_output2.csv'
 sp500_subset_df.to_csv(path.get('Outputs') + filename)
 ########################################################################################################################
 # a nice figure
